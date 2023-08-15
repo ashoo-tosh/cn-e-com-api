@@ -56,28 +56,24 @@ module.exports.delete = async function(req, res){
 module.exports.updateQuantity  = async (req, res) => {
     try {
         const productId = req.params.id;
-        const num = req.query.number;
+        const num = req.body.quantity;
     
         if (!num) {
             res.status(400).json({ message: "Param number is required for incrementing or decrementing the quantity of product" });
             return;
         }
-    
-        const product = await Product.findOne({ _id: productId });
-        let newQuantity = product.quantity + (+num);
-    
-        if (newQuantity >= 0) {
-            const updatedProduct = await Product.findOneAndUpdate(
-                { _id: productId },
-                { quantity: newQuantity },
-                { new: true, runValidators: true }
-            );
-            res.status(404).json({ updatedProduct, message: "Successfully updated" });
-        } else {
-            res.status(400).json({ message: "Total Quantity cannot be less than zero" });
-            return;
+        
+        const updatedProduct = await Product.findByIdAndUpdate(productId, { quantity: newQuantity }, { new: true });
+        
+        if(!updatedProduct){
+            return res.status(404).json({
+                massage: 'Product not found'
+            });
         }
+        return res.json(updatedProduct);
+       
     } catch (err) {
         res.status(500).json({ message: "Error in updating product"});
     }
 }
+
